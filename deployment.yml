@@ -1,0 +1,32 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: appgrupo1
+spec:
+  selector:
+    matchLabels:
+      app: appgrupo1
+  replicas: 1 # indica al controlador que ejecute 2 pods
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: appgrupo1
+    spec:
+      containers:
+      - name: app
+        image: rodrigozunigab/my-java-grupo1:latest
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200M
+          requests:
+            cpu:  50m
+            memory: 100M    
+        ports:
+        - containerPort: 8081        
+        

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: configmap-env-pod
+data:
+ APP_IMAGE: rodrigozunigab/my-java-grupo1:latest
+ DB_USER: root
