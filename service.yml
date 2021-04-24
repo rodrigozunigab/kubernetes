@@ -7,7 +7,6 @@ spec:
     app: appgrupo1
   ports:
     - name: http
-      protocol: TCP
       port: 80
       targetPort: 8081
-  type: NodePort
+# type: NodePort
