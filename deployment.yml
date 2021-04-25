@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: appgrupo1
-  replicas: 1 # indica al controlador que ejecute 2 pods
+  replicas: 1 
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -31,7 +31,7 @@ spec:
           - containerPort: 8081 
         volumeMounts:
           - mountPath: "/usr/src/data"
-            name: volumen-data
+            name: volumen-data                        
         readinessProbe:
           tcpSocket:
             port: 8081
@@ -42,7 +42,28 @@ spec:
             port: 8081
           initialDelaySeconds: 120
           periodSeconds: 20
+      - name: mariadb
+        image: docker.io/mariadb:10.4
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mariadb-root-password
+                key: password
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mariadb
+                key: basededatos                
+        ports:
+          - containerPort: 3306
+            protocol: TCP
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mariadb-volume-1   
       volumes:
           - name: volumen-data
-            emptyDir: {}       
+            emptyDir: {}
+          - name: mariadb-volume-1
+            emptyDir: {}           
         

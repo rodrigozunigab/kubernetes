@@ -1,8 +1,11 @@
 # kubernetes
 minikube start
+kubectl apply -f configMap.yml
+kubectl apply -f secret.yml
 kubectl apply -f deployment.yml
 kubectl apply -f service.yml 
 kubectl apply -f hpa.yml
+kubectl apply -f ingress.yml
 
 kubectl get pods
 kubectl get svc appgrupo1-service
