@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: appgrupo1
-  replicas: 1 
+  replicas: 2 
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -48,7 +48,7 @@ spec:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: mariadb-root-password
+                name: mariadb-root-pass
                 key: password
           - name: MYSQL_DATABASE
             valueFrom:
