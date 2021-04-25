@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: rodrigozunigab/my-java-grupo1:latest
+        image: rodrigozunigab/my-java-grupo1:latest             
         resources:
           limits:
             cpu: 100m
@@ -28,5 +28,21 @@ spec:
             cpu:  50m
             memory: 100M    
         ports:
-        - containerPort: 8081        
+          - containerPort: 8081 
+        volumeMounts:
+          - mountPath: "/usr/src/data"
+            name: volumen-data
+        readinessProbe:
+          tcpSocket:
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 20
+      volumes:
+          - name: volumen-data
+            emptyDir: {}       
         

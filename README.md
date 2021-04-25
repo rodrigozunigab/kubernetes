@@ -24,3 +24,10 @@ wget http://10.104.181.29:80/rest/mscovid/test?msg=testing -O resultadoServicio
 
 se valida viendo los logs en vivo de los dos pods creados para verificar que respondan los dos
 kubectl logs appgrupo1-7c5f899b4b-flqz5 -f
+
+Ahora probando con la ip de ingress
+kubectl get ingress
+https://192.168.64.3/rest/mscovid/test?msg=testing
+
+kubectl logs -f deployment/appgrupo1 --all-containers=true --since=10m
+kubectl delete deployment/appgrupo1
