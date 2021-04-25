@@ -19,7 +19,10 @@ spec:
     spec:
       containers:
       - name: app
-        image: rodrigozunigab/my-java-grupo1:latest             
+        image: rodrigozunigab/my-java-grupo1:latest   
+        env:
+          - name: PATH_MOUNTH
+            value: "/usr/src/data"          
         resources:
           limits:
             cpu: 100m
@@ -30,7 +33,7 @@ spec:
         ports:
           - containerPort: 8081 
         volumeMounts:
-          - mountPath: "/usr/src/data"
+          - mountPath: "$(PATH_MOUNTH)"
             name: volumen-data                        
         readinessProbe:
           tcpSocket:
@@ -43,7 +46,7 @@ spec:
           initialDelaySeconds: 120
           periodSeconds: 20
       - name: mariadb
-        image: docker.io/mariadb:10.4
+        image: docker.io/mariadb:10.4        
         env:
           - name: MYSQL_ROOT_PASSWORD
             valueFrom:
