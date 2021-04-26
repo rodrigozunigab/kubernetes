@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: diplomadodevops-grupo1
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb
+  namespace: diplomadodevops-grupo1
+data:
+  basededatos: "prueba"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-root-pass
+  namespace: diplomadodevops-grupo1
+type: Opaque
+data:
+  password: ZGlwbG9tYWRv
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: appgrupo1
+  namespace: diplomadodevops-grupo1
+spec:
+  selector:
+    matchLabels:
+      app: appgrupo1
+  replicas: 2 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: appgrupo1
+    spec:
+      containers:
+      - name: app
+        image: rodrigozunigab/my-java-grupo1:latest   
+        env:
+          - name: PATH_MOUNTH
+            value: "/usr/src/data"          
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200M
+          requests:
+            cpu:  50m
+            memory: 100M    
+        ports:
+          - containerPort: 8081 
+        volumeMounts:
+          - mountPath: "$(PATH_MOUNTH)"
+            name: volumen-data                        
+        readinessProbe:
+          tcpSocket:
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8081
+          initialDelaySeconds: 120
+          periodSeconds: 20
+      - name: mariadb
+        image: docker.io/mariadb:10.4        
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mariadb-root-pass
+                key: password
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: mariadb
+                key: basededatos                
+        ports:
+          - containerPort: 3306
+            protocol: TCP
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mariadb-volume-1   
+      volumes:
+          - name: volumen-data
+            emptyDir: {}
+          - name: mariadb-volume-1
+            emptyDir: {}               
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels: 
+    app: grupo1-service
+  name: grupo1-service
+  namespace: diplomadodevops-grupo1
+spec:
+  type: ClusterIP
+  selector:
+    app: grupo1-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+status:
+  loadBalancer: {}
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: grupo1-autoscaler
+  namespace: diplomadodevops-grupo1
+spec:
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 50
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: appgrupo1  
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grupo1-ingress
+  namespace: diplomadodevops-grupo1
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /rest
+            backend:
+              service:
+                name: appgrupo1-service
+                port: 
+                  number: 80
